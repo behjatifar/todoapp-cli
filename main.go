@@ -8,24 +8,39 @@ import (
 )
 
 type Category struct {
-	CategoryTitle string
-	CategoryColor string
+	Title string
+	Color string
 }
 type User struct {
 	id       int
 	email    string
 	password string
+	tasks    []string
 }
 
-var storage = make([]Category, 10)
-var userStorage = make([]User, 1, 10)
+type Tasks struct {
+	id           int
+	taskCategory TaskCategory
+	taskName     string
+}
+
+var categoryStorage = make([]Category, 10)
+var userStorage = make([]User, 0)
+var AuthUser User
 
 func main() {
 	// CLI Command line Application Interface
 	fmt.Println("Hello Todo App")
 	command := flag.String("command", "new task", "Create a new task")
+	// runCommand(*command)
 	flag.Parse()
-	runCommand(*command)
+	for {
+		runCommand((*command))
+		scanner := bufio.NewScanner(os.Stdin)
+		fmt.Println("please enter another command")
+		scanner.Scan()
+		*command = scanner.Text()
+	}
 
 }
 
@@ -37,6 +52,12 @@ func runCommand(command string) {
 		createCategory()
 	case "register-user":
 		registerUser()
+	case "login":
+		Login()
+	case "show-users":
+		fmt.Printf("%v \n", userStorage)
+	case "exit":
+		os.Exit(0)
 	default:
 		{
 			println("command is not valid")
@@ -69,9 +90,9 @@ func createCategory() {
 	scanner.Scan()
 	categoryColor = scanner.Text()
 	// fmt.Printf(" category created: categoryTitle %s categoryColor %s ", categoryTitle, categoryColor)
-	category := Category{CategoryTitle: categoryTitle, CategoryColor: categoryColor}
-	storage = append(storage, category)
-	fmt.Println(storage)
+	category := Category{Title: categoryTitle, Color: categoryColor}
+	categoryStorage = append(categoryStorage, category)
+	fmt.Println(categoryStorage)
 }
 
 func registerUser() {
@@ -84,7 +105,37 @@ func registerUser() {
 	email = scanner.Text()
 	fmt.Println("now we need a password for next logins")
 	scanner.Scan()
+
 	password = scanner.Text()
-	user := User{len(userStorage) + 1, email, password}
+	user := User{
+		id:       len(userStorage) + 1,
+		email:    email,
+		password: password}
 	userStorage = append(userStorage, user)
+}
+
+func Login() {
+	scanner := bufio.NewScanner((os.Stdin))
+	var inputEmail, inputPassword string
+	fmt.Println("PLEASE ENTER YOUR EMAIL")
+	scanner.Scan()
+	inputEmail = scanner.Text()
+	fmt.Println("PLEASE ENTER YOUR PASSWORD")
+	scanner.Scan()
+	inputPassword = scanner.Text()
+	// fmt.Println("user enterd ", email, password)
+
+	for _, v := range userStorage {
+		if v.email == inputEmail {
+			var Auth bool = inputPassword == v.password
+			if Auth {
+				fmt.Println("login sucess")
+				AuthUser = v
+				fmt.Println(AuthUser)
+			}
+		} else {
+			fmt.Println("Login Failed..")
+		}
+	}
+
 }
