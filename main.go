@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// Data-Types Structures
 type Category struct {
 	Title string
 	Color string
@@ -15,17 +16,19 @@ type User struct {
 	id       int
 	email    string
 	password string
-	tasks    []string
+	tasks    []Tasks
 }
 
 type Tasks struct {
 	id           int
-	taskCategory TaskCategory
+	taskCategory Category
 	taskName     string
 }
 
+// In Memory System Storage
 var categoryStorage = make([]Category, 10)
 var userStorage = make([]User, 0)
+var taskStorage = make([]Tasks, 0)
 var AuthUser User
 
 func main() {
@@ -66,18 +69,27 @@ func runCommand(command string) {
 }
 
 func createTask() {
-	scanner := bufio.NewScanner((os.Stdin))
-	var name, duedate, category string
-	fmt.Println("please enter task title")
-	scanner.Scan()
-	name = scanner.Text()
-	fmt.Println("please enter due-date title")
-	scanner.Scan()
-	duedate = scanner.Text()
-	fmt.Println("please enter category ")
-	scanner.Scan()
-	category = scanner.Text()
-	fmt.Println("task", name, duedate, category)
+	if len(AuthUser.password) > 1 {
+
+		scanner := bufio.NewScanner((os.Stdin))
+		var name, duedate, category string
+		fmt.Println("please enter task title")
+		scanner.Scan()
+		name = scanner.Text()
+		fmt.Println("please enter due-date title")
+		scanner.Scan()
+		duedate = scanner.Text()
+		fmt.Println("please enter category ")
+		scanner.Scan()
+		category = scanner.Text()
+		fmt.Println("task", name, duedate, category)
+		//  Note , in this case i enter a test category later we need to fix categories and in this part user should choose by exist category not creating one here
+		newTask := Tasks{id: len(taskStorage) + 1, taskName: name, taskCategory: Category{Title: category, Color: "green"}}
+
+		AuthUser.tasks = append(AuthUser.tasks, newTask)
+	} else {
+		fmt.Println("Please Login First")
+	}
 }
 
 func createCategory() {
